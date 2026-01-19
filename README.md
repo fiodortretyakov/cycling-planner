@@ -9,7 +9,7 @@ Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips us
 
 ## How to run locally
 
-- Create and activate a Python 3.10+ virtualenv.
+- Create and activate a Python 3.13+ virtualenv.
 - Install deps: `pip install -r requirements.txt`
 - Optional: create a `.env` file in the repo root (auto-loaded via python-dotenv in `src/main.py`):
 
@@ -66,7 +66,7 @@ Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips us
 ## CI/CD
 
 - GitHub Actions runs tests and coverage on push/PR (see `.github/workflows/test.yml`).
-- A smoke job runs `scripts/smoke_anthropic.py` with the repo’s `ANTHROPIC_API_KEY` secret to verify Anthropic connectivity/auth. Low-credit errors are treated as success to confirm wiring without failing the build.
+- A smoke job runs `scripts/smoke_anthropic.py` with the repo's `ANTHROPIC_API_KEY` secret to verify Anthropic connectivity/auth. Low-credit errors are treated as success to confirm wiring without failing the build.
 
 ## Testing
 
