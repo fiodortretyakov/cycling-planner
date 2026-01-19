@@ -30,11 +30,22 @@ jobs:
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       run: |
-        pytest tests/ -v --tb=short
+        pytest tests/ -v --tb=short --cov=src --cov-report=term --cov-report=xml
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v5
+      if: always()
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
     
     - name: Upload coverage
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results
-        path: .pytest_cache/
+        name: coverage-report
+        path: |
+          coverage.xml
+          htmlcov/

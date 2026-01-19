@@ -3,5 +3,6 @@ uvicorn[standard]
 pydantic
 pytest
 pytest-mock
+pytest-cov
 httpx
 anthropic
