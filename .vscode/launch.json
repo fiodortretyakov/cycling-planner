@@ -10,7 +10,8 @@
       "justMyCode": false,
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
-      }
+      },
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Python: FastAPI",
@@ -29,7 +30,8 @@
       "justMyCode": false,
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
-      }
+      },
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Python: Debug Tests",
@@ -45,7 +47,8 @@
       "justMyCode": false,
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
-      }
+      },
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Python: Debug Current Test File",
@@ -61,7 +64,8 @@
       "justMyCode": false,
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
-      }
+      },
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
