@@ -23,7 +23,8 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.autopep8",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
         "GitHub.copilot-chat",
         "ms-python.debugpy",
         "ms-python.vscode-python-envs",
@@ -35,12 +36,39 @@
         "donjayamanne.githistory"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
         "python.testing.pytestEnabled": true,
         "python.testing.unittestEnabled": false,
         "python.testing.pytestArgs": [
-          "tests"
-        ]
+          "tests",
+          "-v",
+          "--tb=short"
+        ],
+        "python.testing.cwd": "${containerWorkspaceFolder}",
+        "python.testing.autoTestDiscoverOnSaveEnabled": true,
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.envFile": "${containerWorkspaceFolder}/.env",
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.diagnosticMode": "workspace",
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          },
+          "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          ".pytest_cache": true,
+          ".venv": false
+        },
+        "files.watcherExclude": {
+          "**/.venv/**": true,
+          "**/htmlcov/**": true,
+          "**/.pytest_cache/**": true
+        }
       }
     }
   },
