@@ -4,6 +4,9 @@
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
       "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/git-lfs:1": {
+      "version": "latest"
     }
   },
   "postCreateCommand": "python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt",
@@ -11,7 +14,14 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.vscode-pylance",
+        "ms-python.autopep8",
+        "GitHub.copilot-chat",
+        "ms-python.debugpy",
+        "ms-python.vscode-python-envs",
+        "GitHub.copilot",
+        "DavidAnson.vscode-markdownlint",
+        "ms-azuretools.vscode-containers"
       ],
       "settings": {
         "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
