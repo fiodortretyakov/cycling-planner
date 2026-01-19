@@ -15,6 +15,27 @@ Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips us
 - Start API: `uvicorn src.main:app --reload`
 - Open `http://localhost:8000/docs` for the interactive Swagger UI.
 
+## Try It
+- Start the API locally:
+
+  ```bash
+  uvicorn src.main:app --reload
+  ```
+
+- Send a sample chat request:
+
+  ```bash
+  curl -sS -X POST http://localhost:8000/chat \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "session_id": "demo-1",
+      "message": "Plan a June trip from Amsterdam to Copenhagen at ~100km/day with a hostel every 4 nights",
+      "preferences": {"accommodation": "camping"}
+    }' | jq .
+  ```
+
+  Tip: set `ANTHROPIC_API_KEY` in a `.env` file to enable Claude-enhanced extraction and summaries; otherwise the agent uses built-in fallbacks.
+
 ## API
 - `POST /chat` — Send `{ "session_id": "optional", "message": "text", "preferences": { ... } }` and receive a day-by-day plan plus clarifying questions if needed.
 - `GET /health` — Liveness probe.
