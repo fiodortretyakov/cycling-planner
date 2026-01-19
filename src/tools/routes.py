@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import httpx
-from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -14,7 +13,7 @@ class RouteWaypoint(BaseModel):
 class RouteRequest(BaseModel):
     origin: str
     destination: str
-    preferred_daily_km: Optional[float] = None
+    preferred_daily_km: float | None = None
 
 
 class RouteResult(BaseModel):
@@ -22,7 +21,7 @@ class RouteResult(BaseModel):
     destination: str
     total_distance_km: float
     estimated_days: int
-    waypoints: List[RouteWaypoint]
+    waypoints: list[RouteWaypoint]
 
 
 MOCK_ROUTES = {
@@ -75,7 +74,7 @@ def get_route(request: RouteRequest) -> RouteResult:
     return _create_simple_route(request, origin_coords, dest_coords)
 
 
-def _geocode_location(location: str) -> Optional[tuple[float, float]]:
+def _geocode_location(location: str) -> tuple[float, float] | None:
     """Geocode location using Nominatim API."""
     try:
         url = "https://nominatim.openstreetmap.org/search"

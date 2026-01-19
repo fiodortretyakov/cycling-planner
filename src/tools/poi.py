@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import httpx
-from typing import List
 from pydantic import BaseModel
 
 
@@ -27,7 +26,7 @@ MOCK_POIS = {
 }
 
 
-def get_points_of_interest(request: POIRequest) -> List[POIResult]:
+def get_points_of_interest(request: POIRequest) -> list[POIResult]:
     """
     Get points of interest using OpenStreetMap Overpass API.
     Searches for tourist attractions, viewpoints, and landmarks.
@@ -75,7 +74,7 @@ def _geocode_location(location: str) -> tuple[float, float] | None:
     return None
 
 
-def _search_pois_osm(coords: tuple[float, float], location_name: str) -> List[POIResult]:
+def _search_pois_osm(coords: tuple[float, float], location_name: str) -> list[POIResult]:
     """Search for points of interest using Overpass API."""
     lat, lon = coords
     

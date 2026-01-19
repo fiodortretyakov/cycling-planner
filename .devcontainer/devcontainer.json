@@ -29,7 +29,10 @@
         "ms-python.vscode-python-envs",
         "GitHub.copilot",
         "DavidAnson.vscode-markdownlint",
-        "ms-azuretools.vscode-containers"
+        "ms-azuretools.vscode-containers",
+        "github.vscode-github-actions",
+        "ms-vscode.makefile-tools",
+        "donjayamanne.githistory"
       ],
       "settings": {
         "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",

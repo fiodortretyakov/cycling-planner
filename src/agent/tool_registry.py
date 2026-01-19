@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from src.tools.routes import get_route
 from src.tools.accommodation import find_accommodation
@@ -14,7 +14,7 @@ from src.tools.budget import estimate_budget
 ToolFunction = Callable[..., Any]
 
 
-def get_available_tools() -> Dict[str, ToolFunction]:
+def get_available_tools() -> dict[str, ToolFunction]:
     return {
         "get_route": get_route,
         "find_accommodation": find_accommodation,

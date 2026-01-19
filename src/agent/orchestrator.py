@@ -4,7 +4,6 @@ import os
 import re
 import uuid
 import json
-from typing import Dict, List, Optional, Tuple
 
 import anthropic
 
@@ -18,16 +17,16 @@ from src.tools.poi import get_points_of_interest, POIRequest
 
 class ConversationMemory:
     def __init__(self) -> None:
-        self.sessions: Dict[str, List[ChatMessage]] = {}
+        self.sessions: dict[str, list[ChatMessage]] = {}
 
     def append(self, session_id: str, message: ChatMessage) -> None:
         self.sessions.setdefault(session_id, []).append(message)
 
-    def get(self, session_id: str) -> List[ChatMessage]:
+    def get(self, session_id: str) -> list[ChatMessage]:
         return self.sessions.get(session_id, [])
 
 
-def _extract_cities(text: str) -> Tuple[Optional[str], Optional[str]]:
+def _extract_cities(text: str) -> tuple[str | None, str | None]:
     # Flexible matcher that stops at punctuation or the word "in" (common for dates/seasons)
     match = re.search(r"from\s+([A-Za-z\s]+?)\s+to\s+([A-Za-z\s]+?)(?:\s+in\s+|[\.,]|$)", text, re.IGNORECASE)
     if match:
@@ -35,7 +34,7 @@ def _extract_cities(text: str) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 
-def _extract_month(text: str) -> Optional[str]:
+def _extract_month(text: str) -> str | None:
     months = [
         "january",
         "february",
@@ -56,14 +55,14 @@ def _extract_month(text: str) -> Optional[str]:
     return None
 
 
-def _extract_daily_distance(text: str) -> Optional[float]:
+def _extract_daily_distance(text: str) -> float | None:
     match = re.search(r"(\d{2,3})\s?km", text.lower())
     if match:
         return float(match.group(1))
     return None
 
 
-def _hostel_frequency(text: str) -> Optional[int]:
+def _hostel_frequency(text: str) -> int | None:
     match = re.search(r"hostel every (\d+)[a-z]* night", text.lower())
     if match:
         return int(match.group(1))
@@ -79,11 +78,11 @@ def _build_plan(
     route_result,
     daily_km: float,
     accommodation_pref: str,
-    hostel_every: Optional[int],
+    hostel_every: int | None,
     weather,
     elevation,
-) -> List[DayPlan]:
-    plans: List[DayPlan] = []
+) -> list[DayPlan]:
+    plans: list[DayPlan] = []
     total = route_result.total_distance_km
     distance_done = 0.0
     day = 1
@@ -116,7 +115,7 @@ def _build_plan(
     return plans
 
 
-def _clarifying_questions(origin: Optional[str], destination: Optional[str], month: Optional[str]) -> List[str]:
+def _clarifying_questions(origin: str | None, destination: str | None, month: str | None) -> list[str]:
     questions = []
     if not origin:
         questions.append("Where are you starting?")
@@ -191,7 +190,7 @@ def handle_chat(request: ChatRequest, memory: ConversationMemory) -> ChatRespons
     return ChatResponse(session_id=session_id, messages=memory.get(session_id), day_plan=plan, status="ok")
 
 
-def _extract_with_claude(message: str, conversation_history: List[ChatMessage]) -> Optional[Dict]:
+def _extract_with_claude(message: str, conversation_history: list[ChatMessage]) -> dict | None:
     """Use Claude to extract trip parameters from natural language."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -240,7 +239,7 @@ Example: {{"origin": "Amsterdam", "destination": "Copenhagen", "month": "June", 
         return None
 
 
-def _extract_with_regex(message: str, preferences: Optional[dict]) -> Dict:
+def _extract_with_regex(message: str, preferences: dict | None) -> dict:
     """Fallback regex extraction (original implementation)."""
     origin, destination = _extract_cities(message)
     month = _extract_month(message) or (preferences.get("month") if preferences else None)
@@ -258,7 +257,7 @@ def _extract_with_regex(message: str, preferences: Optional[dict]) -> Dict:
     }
 
 
-def _generate_clarifying_response_with_claude(questions: List[str], user_message: str) -> Optional[str]:
+def _generate_clarifying_response_with_claude(questions: list[str], user_message: str) -> str | None:
     """Use Claude to generate natural clarifying questions."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -285,7 +284,7 @@ Generate a friendly, natural response asking for these details. Be conversationa
         return None
 
 
-def _generate_plan_summary_with_claude(route, weather, elevation, plan, daily_km) -> Optional[str]:
+def _generate_plan_summary_with_claude(route, weather, elevation, plan, daily_km) -> str | None:
     """Use Claude to generate natural plan summary."""
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:

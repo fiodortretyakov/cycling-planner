@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import httpx
-from typing import List
 from pydantic import BaseModel
 
 
@@ -49,7 +48,7 @@ MOCK_ACCOMMODATION = {
 }
 
 
-def find_accommodation(request: AccommodationRequest) -> List[AccommodationResult]:
+def find_accommodation(request: AccommodationRequest) -> list[AccommodationResult]:
     """
     Find accommodation using OpenStreetMap Overpass API.
     Searches for camping, hostels, hotels near the location.
@@ -104,7 +103,7 @@ def _geocode_location(location: str) -> tuple[float, float] | None:
     return None
 
 
-def _search_accommodation_osm(coords: tuple[float, float], preference: str) -> List[AccommodationResult]:
+def _search_accommodation_osm(coords: tuple[float, float], preference: str) -> list[AccommodationResult]:
     """Search for accommodation using Overpass API."""
     lat, lon = coords
     
