@@ -6,3 +6,4 @@ pytest-mock
 pytest-cov
 httpx
 anthropic
+python-dotenv

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from dotenv import load_dotenv
+load_dotenv()
 
 from src.api.chat import router as chat_router
 
