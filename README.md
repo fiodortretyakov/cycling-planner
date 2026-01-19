@@ -1,13 +1,17 @@
 # cycling-planner
 
-Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips using mocked tools for routing, accommodation, weather, and elevation. Built for the Affinity Labs technical assessment.
+Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips using real public APIs with graceful fallbacks for routing, accommodation, weather, elevation, and POIs. Built for the Affinity Labs technical assessment.
 
 ## How to run locally
 - Create and activate a Python 3.10+ virtualenv.
 - Install deps: `pip install -r requirements.txt`
-- (Optional) Set environment variables for enhanced API features:
-  - `OPENROUTESERVICE_API_KEY` - For real routing data via OpenRouteService
-  - `ANTHROPIC_API_KEY` - For AI-powered responses (future feature)
+- Optional: create a `.env` file in the repo root (auto-loaded via python-dotenv in `src/main.py`):
+
+  ```env
+  ANTHROPIC_API_KEY=your_anthropic_key
+  OPENROUTESERVICE_API_KEY=your_ors_key
+  ```
+
 - Start API: `uvicorn src.main:app --reload`
 - Open `http://localhost:8000/docs` for the interactive Swagger UI.
 
@@ -19,21 +23,26 @@ Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips us
 - **Separation of concerns:** `src/agent` for orchestration and memory, `src/tools` for typed, reusable tool implementations, `src/api` for FastAPI routes.
 - **Pydantic models:** All requests/responses are validated to keep the contract explicit.
 - **Conversation state:** In-memory `ConversationMemory` keyed by `session_id` to maintain context between turns.
+- **NLU with Claude + fallback:** When `ANTHROPIC_API_KEY` is available, the agent uses Anthropic Claude to extract intent, ask clarifying questions, and generate summaries. If not, it falls back to deterministic regex/logic so the system still works offline.
 - **Tool-first planning:** The orchestrator extracts intent (route, month, daily km, accommodation cadence), calls tools, and assembles a daily itinerary with weather/elevation context.
-- **Real API integrations with fallbacks:** Tools now integrate with real public APIs:
-  - **Routing:** OpenRouteService API (requires key) or Nominatim geocoding + Haversine distance calculation
-  - **Accommodation:** OpenStreetMap Overpass API for real places
-  - **Weather:** Open-Meteo historical archive API (free, no key required)
-  - **Elevation:** Open-Elevation API for terrain profiles
-  - All tools gracefully fall back to mock data if APIs are unavailable or return no results
+- **Real API integrations with fallbacks:**
+  - **Routing:** OpenRouteService (requires key) or Nominatim geocoding + Haversine fallback.
+  - **Accommodation:** OpenStreetMap Overpass API.
+  - **Weather:** Open-Meteo archive (no key required).
+  - **Elevation:** Open-Elevation API.
+  - **POIs:** OpenStreetMap Overpass API.
+  - All tools degrade to mock/heuristic data when APIs are unavailable.
 
-## What I would build with more time
-- Add Anthropic Claude calls for richer NLU and natural responses while keeping tool-calling grounded.
-- Persist conversation state (Redis/Postgres) and add authentication.
-- Add budget and visa flows end-to-end, plus better POI selection per waypoint.
-- Implement caching for API responses to reduce latency and API costs.
-- Add retry logic and better error handling for external APIs.
-- Create an interactive frontend for better user experience.
+## CI/CD
+- GitHub Actions runs tests and coverage on push/PR (see `.github/workflows/test.yml`).
+- A smoke job runs `scripts/smoke_anthropic.py` with the repo’s `ANTHROPIC_API_KEY` secret to verify Anthropic connectivity/auth. Low-credit errors are treated as success to confirm wiring without failing the build.
 
 ## Testing
-- Run `pytest` to execute basic tool contract tests.
+- Unit tests are designed to run fast by mocking network calls (httpx helpers), so no external API traffic occurs during test runs.
+- Run `pytest` to execute tests locally. Coverage reports (XML/HTML) are generated via `pytest-cov`.
+
+## What I would build with more time
+- Persist conversation state (Redis/Postgres) and add authentication.
+- Add richer budget and visa flows end-to-end, with improved POI selection per waypoint.
+- Implement caching and retry/backoff for external APIs.
+- Create an interactive frontend for better user experience.
