@@ -1,14 +1,19 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from src.agent.orchestrator import ConversationMemory, handle_chat
 from src.agent.schemas import ChatRequest
 
 
+@patch('src.agent.orchestrator.os.environ.get')
 @patch('src.tools.routes.httpx.Client')
 @patch('src.tools.accommodation.httpx.Client')
 @patch('src.tools.weather.httpx.Client')
 @patch('src.tools.elevation.httpx.Client')
-def test_handle_chat_builds_plan(mock_elev, mock_weather, mock_accom, mock_route):
+def test_handle_chat_builds_plan(mock_elev, mock_weather, mock_accom, mock_route, mock_env_get):
     """Test chat handler builds plan with mocked API calls."""
+    # Mock environment to return None for ANTHROPIC_API_KEY
+    # This ensures Claude functions return None and fallback to regex
+    mock_env_get.return_value = None
+    
     # Mock all HTTP clients to return empty responses (triggers fallbacks to mock data)
     mock_response = MagicMock()
     mock_response.json.return_value = []

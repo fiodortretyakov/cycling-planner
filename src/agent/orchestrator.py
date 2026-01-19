@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import os
 import re
 import uuid
+import json
 from typing import Dict, List, Optional, Tuple
+
+import anthropic
 
 from src.agent.schemas import ChatMessage, ChatRequest, ChatResponse, DayPlan
 from src.tools.routes import RouteRequest, get_route
@@ -128,18 +132,28 @@ def handle_chat(request: ChatRequest, memory: ConversationMemory) -> ChatRespons
     incoming = ChatMessage(role="user", content=request.message)
     memory.append(session_id, incoming)
 
-    origin, destination = _extract_cities(request.message)
-    month = _extract_month(request.message) or (request.preferences.get("month") if request.preferences else None)
-    daily_km = _extract_daily_distance(request.message) or (request.preferences.get("daily_km") if request.preferences else None)
-    hostel_every = _hostel_frequency(request.message) or (request.preferences.get("hostel_every") if request.preferences else None)
-    accommodation_pref = request.preferences.get("accommodation", "camping") if request.preferences else "camping"
+    # Try to use Claude for intent extraction
+    extracted = _extract_with_claude(request.message, memory.get(session_id))
+    
+    # Fallback to regex if Claude extraction fails
+    if not extracted:
+        extracted = _extract_with_regex(request.message, request.preferences)
+    
+    origin = extracted.get("origin")
+    destination = extracted.get("destination")
+    month = extracted.get("month")
+    daily_km = extracted.get("daily_km")
+    hostel_every = extracted.get("hostel_every")
+    accommodation_pref = extracted.get("accommodation", "camping")
 
     questions = _clarifying_questions(origin, destination, month)
     if questions:
-        assistant_msg = ChatMessage(
-            role="assistant",
-            content="I need a bit more detail before planning: " + " ".join(questions),
-        )
+        # Use Claude to generate natural clarifying response
+        response_text = _generate_clarifying_response_with_claude(questions, request.message)
+        if not response_text:
+            response_text = "I need a bit more detail before planning: " + " ".join(questions)
+        
+        assistant_msg = ChatMessage(role="assistant", content=response_text)
         memory.append(session_id, assistant_msg)
         return ChatResponse(
             session_id=session_id,
@@ -161,15 +175,140 @@ def handle_chat(request: ChatRequest, memory: ConversationMemory) -> ChatRespons
     preferred_daily = daily_km or 100.0
     plan = _build_plan(route, preferred_daily, accommodation_pref, hostel_every, weather, elevation)
 
-    assistant_summary = ChatMessage(
-        role="assistant",
-        content=(
+    # Use Claude to generate natural response summary
+    summary_text = _generate_plan_summary_with_claude(route, weather, elevation, plan, preferred_daily)
+    if not summary_text:
+        summary_text = (
             f"Planned {len(plan)} days from {route.origin} to {route.destination} "
             f"at ~{preferred_daily}km/day. "
             f"Weather around {weather.avg_temp_c}C with {weather.notes}. "
             f"Elevation: {elevation.difficulty}."
-        ),
-    )
+        )
+    
+    assistant_summary = ChatMessage(role="assistant", content=summary_text)
     memory.append(session_id, assistant_summary)
 
     return ChatResponse(session_id=session_id, messages=memory.get(session_id), day_plan=plan, status="ok")
+
+
+def _extract_with_claude(message: str, conversation_history: List[ChatMessage]) -> Optional[Dict]:
+    """Use Claude to extract trip parameters from natural language."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None
+    
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        
+        # Build conversation context
+        history = "\n".join([f"{msg.role}: {msg.content}" for msg in conversation_history[:-1]])
+        
+        prompt = f"""Extract cycling trip parameters from this conversation.
+Previous conversation:
+{history}
+
+Current message: {message}
+
+Extract these parameters if mentioned:
+- origin: starting city
+- destination: ending city
+- month: travel month
+- daily_km: kilometers per day
+- hostel_every: hostel every N nights
+- accommodation: preference (camping/hostel/hotel)
+
+Return ONLY a JSON object with the parameters found. Use null for missing values.
+Example: {{"origin": "Amsterdam", "destination": "Copenhagen", "month": "June", "daily_km": 100, "hostel_every": 4, "accommodation": "camping"}}"""
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        response_text = response.content[0].text.strip()
+        # Extract JSON from response (might have markdown code blocks)
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+        
+        extracted = json.loads(response_text)
+        # Filter out null values
+        return {k: v for k, v in extracted.items() if v is not None}
+    except Exception:
+        return None
+
+
+def _extract_with_regex(message: str, preferences: Optional[dict]) -> Dict:
+    """Fallback regex extraction (original implementation)."""
+    origin, destination = _extract_cities(message)
+    month = _extract_month(message) or (preferences.get("month") if preferences else None)
+    daily_km = _extract_daily_distance(message) or (preferences.get("daily_km") if preferences else None)
+    hostel_every = _hostel_frequency(message) or (preferences.get("hostel_every") if preferences else None)
+    accommodation_pref = preferences.get("accommodation", "camping") if preferences else "camping"
+    
+    return {
+        "origin": origin,
+        "destination": destination,
+        "month": month,
+        "daily_km": daily_km,
+        "hostel_every": hostel_every,
+        "accommodation": accommodation_pref,
+    }
+
+
+def _generate_clarifying_response_with_claude(questions: List[str], user_message: str) -> Optional[str]:
+    """Use Claude to generate natural clarifying questions."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None
+    
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        
+        prompt = f"""The user said: "{user_message}"
+
+I need to ask for these missing details:
+{chr(10).join(f'- {q}' for q in questions)}
+
+Generate a friendly, natural response asking for these details. Be conversational and helpful."""
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=150,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return response.content[0].text.strip()
+    except Exception:
+        return None
+
+
+def _generate_plan_summary_with_claude(route, weather, elevation, plan, daily_km) -> Optional[str]:
+    """Use Claude to generate natural plan summary."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        return None
+    
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        
+        prompt = f"""Generate a brief, enthusiastic summary for this cycling trip plan:
+- Route: {route.origin} to {route.destination}
+- Distance: {route.total_distance_km}km over {len(plan)} days
+- Daily average: {daily_km}km
+- Weather: {weather.avg_temp_c}°C, {weather.notes}
+- Terrain: {elevation.difficulty} ({elevation.total_elevation_gain_m}m elevation gain)
+
+Make it conversational and encouraging, 2-3 sentences."""
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        return response.content[0].text.strip()
+    except Exception:
+        return None
