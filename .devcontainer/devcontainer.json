@@ -7,6 +7,12 @@
     },
     "ghcr.io/devcontainers/features/git-lfs:1": {
       "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true
     }
   },
   "postCreateCommand": "python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt",
