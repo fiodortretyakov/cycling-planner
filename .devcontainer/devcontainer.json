@@ -26,6 +26,7 @@
       "settings": {
         "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
         "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
         "python.testing.pytestArgs": [
           "tests"
         ]
