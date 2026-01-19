@@ -1,5 +1,10 @@
 # cycling-planner
 
+[![Tests](https://github.com/fiodortretyakov/cycling-planner/actions/workflows/test.yml/badge.svg)](https://github.com/fiodortretyakov/cycling-planner/actions/workflows/test.yml)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips using real public APIs with graceful fallbacks for routing, accommodation, weather, elevation, and POIs. Built for the Affinity Labs technical assessment.
 
 ## How to run locally
