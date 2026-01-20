@@ -39,13 +39,13 @@ Included in README.md - "What I would build with more time" section:
 - Caching and retry/backoff for external APIs
 - Interactive frontend for better UX
 
-## ⏳ 3. Screen Recording - NEEDS TO BE CREATED
+## ⏳ 3. Screen Recording
 
-### How to Create the Demo Recording
+### How I Created the Demo Recording
 
-You need to create a screen recording showing a full conversation flow. Here's how:
+I created a screen recording showing a full conversation flow. Here's how:
 
-#### Option A: Using Built-in Tools (Recommended)
+#### Option A: Using Built-in Tools
 
 ```bash
 # 1. Start the API
@@ -84,6 +84,8 @@ curl -sS -X POST http://localhost:8000/chat \
 - **Windows:** Xbox Game Bar (Win + G) or OBS
 - **Linux:** OBS Studio or SimpleScreenRecorder
 
+I used Android embedded screen recorder because I developed it using Android 16 Desktop Mode
+
 #### Demo Conversation Flow (Suggested)
 
 ```
@@ -107,27 +109,10 @@ API: Returns complete trip plan with:
 
 ### File Locations for Recording
 
-After creating the recording, save it as:
-
-- `docs/demo-recording.mp4` or
-- `docs/demo-recording.webm` or
-- Link to video on YouTube/Google Drive in the README
-
-### Update README with Video Link
-
-Add to the top of README.md after badges:
-
-```markdown
-## Demo
-[Watch a full conversation demo](docs/demo-recording.mp4) showing trip planning from start to finish.
-```
-
----
+After creating the recording, I saved it in GitHub and added it to ReadMe
 
 ## Summary
 
 - ✅ Public repository: READY
 - ✅ README complete: READY
-- ⏳ Demo recording: AWAITING CREATION
-
-**Next Step:** Create the screen recording following the options above and save it to the repository!
+- ✅ Demo recording: READY

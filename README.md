@@ -7,6 +7,10 @@
 
 Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips using real public APIs with graceful fallbacks for routing, accommodation, weather, elevation, and POIs. Built for the Affinity Labs technical assessment.
 
+## Demo
+
+[Watch a full conversation demo](demo/demo-recording.mp4) showing trip planning from start to finish.
+
 ## How to run locally
 
 - Create and activate a Python 3.13+ virtualenv.
