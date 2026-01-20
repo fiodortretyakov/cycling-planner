@@ -9,7 +9,7 @@ Conversational AI agent (FastAPI + Claude) that plans multi-day cycling trips us
 
 ## Demo
 
-[Watch a full conversation demo](demo/demo-recording.mp4) showing trip planning from start to finish.
+[Watch a full conversation demo](https://github.com/user-attachments/assets/5138fc63-e132-40df-a5d6-a3633e734f82) showing trip planning from start to finish.
 
 ## How to run locally
 
